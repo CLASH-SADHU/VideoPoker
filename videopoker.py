@@ -1,30 +1,4 @@
-import random, time
-def help():
-        help_data = """
-           1.Standard table poker hands are used*
-           2.You are dealt five starting cards.
-           3.You can choose to hold or discard any or all of your cards.
-           4.All cards you choose to discard will be replaced in a single random draw
-           5.If your hand now matches any of the qualifying poker hands, you win the corresponding prize
-           Winnings:
-           Jacks or better ..... +5 points
-           Two pairs ..... +10 points
-           Three of a kind ..... +15 points
-           Straight ..... +20 points
-           Flush .... +25 points
-           Full house .... +40 points
-           Four of a kind .... +125 points
-           Straight Flush ....+250 points
-           Royal Flush .... +2000 points"""
-
-        print ("Rules of Video Poker : \n" + help_data)
-        print()
-        inputStr = input ("Type resume to resume the game : ")
-        if inputStr == " resume ":
-            print("Game resumes.")
-            
-
-
+import random, time, os
 class Card( object ):
   def __init__(self, name, value, suit, symbol):
     self.value = value
@@ -78,12 +52,8 @@ class StandardDeck(Deck):
     return "Standard deck of cards:{0} remaining".format(len(self.cards))
 
 class Player(object):
-  def __init__(self, name):
+  def __init__(self):
     self.cards = []
-    self.name = name
-  
-  def __repr__(self):
-    return self.player
 
   def cardCount(self):
     return len(self.cards)
@@ -169,27 +139,80 @@ class PokerScorer(object):
 
     return False
 
+def help():
+        help_data = """
+                            Rules:
+           1.Standard table poker hands are used.
+           2.You are dealt five starting cards.
+           3.You can choose to hold or discard any or all of your cards.
+           4.All cards you choose to discard will be replaced in a single random draw
+           5.If your hand now matches any of the qualifying poker hands, you win the corresponding prize
+                             Winnings:
+           Jacks or better ..... 1X
+           Two pairs ..... ..... 2X
+           Three of a kind ..... 4X
+           Straight ............ 6X
+           Flush ............... 8X
+           Full house .......... 10X
+           Four of a kind ...... 12X
+           Straight Flush ...... 14X
+           Royal Flush ......... 16X"""
+
+        print ("Rules of Video Poker : \n" + help_data)
+        print()
+        resume()
+
+def resume():
+  inputStr = input ("Type resume to resume the game : ")
+  if inputStr == "resume":
+    print("Game resumes.")
+  else:
+    inputStr = input ("Input Error:Type resume to resume the game : ")
+
+
 
 def VideoPoker():
-  nameInput = input ("Enter your name :")
-  player = Player(nameInput)
+  os.system("cls")
+  print("Welcome to Video Poker Game")
+  print()
+  time.sleep(1)
+  print("Enter your name player:")
+  nameInput = input()
+  player = Player()
+  print("For Rules and winnng type help or press any key to start the game,{0}:".format(nameInput))
+  rules = input()
+  if rules.lower() == "help":
+    help()
+  
 
-  # Intial Amount
-  points = 100
-
+  # Player bet
+  bet = int(input("{},deposit money(10-100) :".format(nameInput)))
+  while bet < 10 or bet > 100:
+    bet = int(input("{},minimum deposit:10, maximum deposit:100 :".format(nameInput)))
+  time.sleep(1)
+  
   # Cost per hand
-  handCost = 5
+  handCost = int(input("{0},place a bet(1-10):".format(nameInput)))
+  while handCost < 1 or handCost > 10:
+    handCost = int(input("Invalid bet,Place a bet(1-10):"))   
+  print("{1},each bet is {0} dollars".format(handCost,nameInput))
+  time.sleep(1)
+  
 
   end = False
   while not end:
-    print( "{1} have {0} points".format(points,str(nameInput)) )
-    
+    print()
+    print("{0},your credit:{1} dollars".format(nameInput,bet))
+    bet-= handCost
+    print()
+    time.sleep(1)
 
-    points-= 5
 
     ## Hand Loop
     deck = StandardDeck()
     deck.shuffle()
+    print()
+    time.sleep(1)
 
     # Deal Out
     for i in range(5):
@@ -199,22 +222,19 @@ def VideoPoker():
     for card in player.cards:
       card.showing = True
     print(player.cards)
+    time.sleep(1)
 
     validInput = False
     while not validInput:
-      print("Which cards do you want to discard? ( ie. 1, 2, 3 )")
-      print("*Just hit return to hold all, type exit to quit, type help to know the rules")
+      print()
+      print("Which cards do you want to discard? ( ie. 1, 2, 3, 4, 5 )")
+      print("*Just hit enter to hold all, type exit to quit, type help to know the rules and winnings multiplier:")
       inputStr = input()
 
       if inputStr == "exit":
-        end=True
-        break
+        quit()
       elif inputStr == "help":
-          help()
-          break
-
-
-
+        help()
       try:
         inputList = [int(inp.strip()) for inp in inputStr.split(",") if inp]
 
@@ -230,10 +250,16 @@ def VideoPoker():
 
         validInput = True
       except:
-        print("Input Error: use commas to separated the cards you want to hold")
-
+        print()
+        print(player.cards)
+        print()
+        print("Use commas to separate the cards you want to discard.")
+        
     print(player.cards)
     time.sleep(2)
+
+    
+    
     #Score
     score = PokerScorer(player.cards)
     straight = score.straight()
@@ -244,62 +270,85 @@ def VideoPoker():
     # Royal flush
     if straight and flush and straight == 14:
       print("Royal Flush!!!")
-      print("You win +2000 points")
-      points += 2000
+      print("You win 200 dollars.")
+      bet += 200
+      print()
 
     # Straight flush
     elif straight and flush:
       print("Straight Flush!")
-      print("You win +250 points")
-      points += 250
+      print("You win 150 dollars.")
+      bet += 150
+      print()
 
     # 4 of a kind
     elif score.fourKind():
       print("Four of a kind!")
-      print("You win +125 points")
-      points += 125
+      print("You win 125 dollars")
+      bet += 125
+      print()
 
     # Full House
     elif score.fullHouse():
       print("Full House!")
-      print("You win +40 points")
-      points += 40
+      print("You win 100 dollars")
+      bet += 100
+      print()
 
     # Flush
     elif flush:
       print("Flush!")
-      print("You win +25 points")
-      points += 25
+      print("You win 80 dollars")
+      bet += 80
+      print()
 
     # Straight
     elif straight:
       print("Straight!")
-      print("You win +20 points")
-      points += 20
+      print("You win 60 dollars")
+      bet += 60
+      print()
 
     # 3 of a kind
     elif highestCount == 3:
       print("Three of a Kind!")
-      print("You win +15 points")
-      points += 15
+      print("You win 40 dollars")
+      bet += 40
+      print()
 
     # 2 pair
     elif len(pairs) == 2:
       print("Two Pairs!")
-      print("You win +10 points")
-      points += 10
+      print("You win 20 dollars")
+      bet += 20
+      print()
 
     # Jacks or better
     elif pairs and pairs[0] > 10:
       print ("Jacks or Better!")
-      print("You win +5 points")
-      points += 5
-
+      print("You win 10 dollars")
+      bet += 10
+      print()
+    else:
+      print("No win")
+      print()
+    print("Do you want to cash out or continue ?")
+    withdraw = input("press y to cash out or press any key to continue?: ")
+    if withdraw.lower() == "y":
+      print("{0},your withdraw amount: {1}".format(nameInput,bet))
+      print("ThankYou for playing.See you next time! ")
+      time.sleep(1)
+      quit()
     player.cards=[]
-    if points == 0:
-      print("You loose all your points. Game Over.")
-      end = True
-      break
+    if bet <= 0:
+      print("You loose all your bet. Game Over.")
+      restart = input("do you want to restart y/n?")
+      if restart.lower() == "n":
+        quit()
+        
+      elif restart.lower() == "y":
+        VideoPoker()
+      
 
 
 VideoPoker()
