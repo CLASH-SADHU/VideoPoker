@@ -40,14 +40,13 @@ class StandardDeck(Deck):
               "Ace":14 }
 
     for name in values:
-      for suit in suits:
-        symbolIcon = suits[suit]
-        if values[name] < 11:
-          symbol = str(values[name])+symbolIcon
-        else:
-          symbol = name[0]+symbolIcon
-        self.cards.append( Card(name, values[name], suit, symbol) )
-
+        for suit in suits:
+          symbolIcon = suits[suit]
+          if values[name] < 11:
+            symbol = str(values[name])+symbolIcon
+          else:
+            symbol = name[0]+symbolIcon
+          self.cards.append( Card(name, values[name], suit, symbol) )
   def __repr__(self):
     return "Standard deck of cards:{0} remaining".format(len(self.cards))
 
@@ -143,76 +142,90 @@ def help():
         help_data = """
                             Rules:
            1.Standard table poker hands are used.
-           2.You are dealt five starting cards.
-           3.You can choose to hold or discard any or all of your cards.
-           4.All cards you choose to discard will be replaced in a single random draw
-           5.If your hand now matches any of the qualifying poker hands, you win the corresponding prize
-                             Winnings:
-           Jacks or better ..... 1X
-           Two pairs ..... ..... 2X
-           Three of a kind ..... 4X
-           Straight ............ 6X
-           Flush ............... 8X
-           Full house .......... 10X
-           Four of a kind ...... 12X
-           Straight Flush ...... 14X
-           Royal Flush ......... 16X"""
+           2.You need to make a deposit.(minimum-10credit,maximum-100credit)
+           3.Each Hand Costs 5 credits.
+           4.You are dealt five starting cards.
+           5.You can choose to hold or discard any or all of your cards.
+            5.1 Inorder to discard cards you need to enter numbers(1-5).seperated with commas in refrence to card number.
+           6.All cards you choose to discard will be replaced in a single random draw.
+           7.If your hand now matches any of the qualifying poker hands,you win the corresponding prize.
 
-        print ("Rules of Video Poker : \n" + help_data)
+           Poker Hands              Winnings:
+                                                         example ('-'followed by card and its suits denotes winning cards)
+           Jacks or better .....        20         [10♡,5♡,Q♠,-K♣,-K♠]
+           Two pairs ..... .....        40         [-10♡,5♡,-10♠,-K♣,-K♠]
+           Three of a kind .....        60         [-Q♢, K♡, A♣,-Q♠,-Q♣]
+           Straight ............        80         [-9♡,-10♡,-J♠,-Q♣,-K♠]
+           Flush ...............        100        [-10♡,-5♡,-Q♡,-K♡,A♠]
+           Full house ..........        120        [-Q♢,- A♡, A♣,-Q♠,-Q♣]
+           Four of a kind ......        140        [-Q♢, Q♡, A♣,-Q♠,-Q♣]
+           Straight Flush ......        160        [-2♣,-3♣,-4♣,-5♣,-6♣]   
+           Royal Flush .........        200        [-A♣,-K♣,-Q♣,-J♣,-10♣] """
+
+        print ("Rules and Winnings of Video Poker : \n" + help_data)
         print()
         resume()
+        os.system("cls")
+        print("Game resumes.")
+        
 
 def resume():
-  inputStr = input ("Type resume to resume the game : ")
-  if inputStr == "resume":
-    print("Game resumes.")
-  else:
-    inputStr = input ("Input Error:Type resume to resume the game : ")
-
-
+  inputStr = input ("Type resume to resume the game :")
+  while "resume"  not in inputStr:
+    inputStr = input ("Input Error:-type resume to resume the game :")
 
 def VideoPoker():
   os.system("cls")
   print("Welcome to Video Poker Game")
   print()
   time.sleep(1)
-  print("Enter your name player:")
-  nameInput = input()
+ 
+  nameInput = input("Enter your name player:")
+  while not nameInput:
+    nameInput = input("Required input,Enter your name player: ")
   player = Player()
-  print("For Rules and winnng type help or press any key to start the game,{0}:".format(nameInput))
-  rules = input()
+  rules = input("For Rules and Winnng Multipliers-type help or press Enter to start the game,{0}: ".format(nameInput))
   if rules.lower() == "help":
+    os.system("cls")
     help()
-  
-
+  print("Game Startinng")
+  time.sleep(1)
+  os.system("cls")
+ 
   # Player bet
-  bet = int(input("{},deposit money(10-100) :".format(nameInput)))
-  while bet < 10 or bet > 100:
-    bet = int(input("{},minimum deposit:10, maximum deposit:100 :".format(nameInput)))
-  time.sleep(1)
+  isBet = False
+  while not isBet:
+    bet = input("{0},Deposit credits(10-100):".format(nameInput))
+    if bet == "help":
+      help()
+    try:
+      bet = int(bet)
+      while bet < 10 or bet > 100:
+        bet = int(input("{0},Minimum deposit:10,Maximum deposit:100:".format(nameInput)))
+        break
+      isBet = True
+    except ValueError:
+      print("{0},Credits are only numbers".format(nameInput))
   
-  # Cost per hand
-  handCost = int(input("{0},place a bet(1-10):".format(nameInput)))
-  while handCost < 1 or handCost > 10:
-    handCost = int(input("Invalid bet,Place a bet(1-10):"))   
-  print("{1},each bet is {0} dollars".format(handCost,nameInput))
-  time.sleep(1)
+  # Cost per hand is 5 credits
+  handCost = 5
+  print("{0},each hand costs you {1} credits.".format(nameInput,handCost))
+  time.sleep(2)
   
 
   end = False
   while not end:
-    print()
-    print("{0},your credit:{1} dollars".format(nameInput,bet))
+    bet = int(bet)
     bet-= handCost
-    print()
-    time.sleep(1)
+    os.system("cls")
 
 
     ## Hand Loop
     deck = StandardDeck()
     deck.shuffle()
+    print("{0},your credit:{1}".format(nameInput,bet))
     print()
-    time.sleep(1)
+    
 
     # Deal Out
     for i in range(5):
@@ -227,17 +240,15 @@ def VideoPoker():
     validInput = False
     while not validInput:
       print()
-      print("Which cards do you want to discard? ( ie. 1, 2, 3, 4, 5 )")
-      print("*Just hit enter to hold all, type exit to quit, type help to know the rules and winnings multiplier:")
+      print("""Which cards do you want to discard? ( ie. 1, 2, 3, 4, 5 ) or \n-Just hit ENTER to hold all, -type exit to quit the game, -type help to know the rules and Winnings:""")
       inputStr = input()
-
-      if inputStr == "exit":
+      if inputStr.lower() == "exit":
         quit()
-      elif inputStr == "help":
+      elif inputStr.lower() == "help":
+        os.system("cls")
         help()
       try:
         inputList = [int(inp.strip()) for inp in inputStr.split(",") if inp]
-
         for inp in inputList:
           if inp > 6:
             continue 
@@ -252,11 +263,11 @@ def VideoPoker():
       except:
         print()
         print(player.cards)
-        print()
-        print("Use commas to separate the cards you want to discard.")
+        print("Use commas between the numbers to discard the cards,follow the question below.")
         
+    print()
     print(player.cards)
-    time.sleep(2)
+    time.sleep(1)
 
     
     
@@ -270,94 +281,94 @@ def VideoPoker():
     # Royal flush
     if straight and flush and straight == 14:
       print("Royal Flush!!!")
-      print("You win 200 dollars.")
+      print("You win 200 credits.")
       bet += 200
       print()
 
     # Straight flush
     elif straight and flush:
       print("Straight Flush!")
-      print("You win 150 dollars.")
-      bet += 150
+      print("You win 160 credits.")
+      bet += 160
       print()
 
     # 4 of a kind
     elif score.fourKind():
       print("Four of a kind!")
-      print("You win 125 dollars")
-      bet += 125
+      print("You win 140 credits")
+      bet += 140
       print()
 
     # Full House
     elif score.fullHouse():
       print("Full House!")
-      print("You win 100 dollars")
-      bet += 100
+      print("You win 120 credits")
+      bet += 120
       print()
 
     # Flush
     elif flush:
       print("Flush!")
-      print("You win 80 dollars")
-      bet += 80
+      print("You win 100 credits")
+      bet += 100
       print()
 
     # Straight
     elif straight:
       print("Straight!")
-      print("You win 60 dollars")
-      bet += 60
+      print("You win 80 credits")
+      bet += 80
       print()
 
     # 3 of a kind
     elif highestCount == 3:
       print("Three of a Kind!")
-      print("You win 40 dollars")
-      bet += 40
+      print("You win 60 credits")
+      bet += 60
       print()
 
     # 2 pair
     elif len(pairs) == 2:
       print("Two Pairs!")
-      print("You win 20 dollars")
-      bet += 20
+      print("You win 40 credits")
+      bet += 40
       print()
 
     # Jacks or better
     elif pairs and pairs[0] > 10:
       print ("Jacks or Better!")
-      print("You win 10 dollars")
-      bet += 10
+      print("You win 20 crdits")
+      bet += 20
       print()
     else:
       print("No win")
       print()
+   
+    if bet <= 0:
+      print("You loose all your credits. Game Over.")
+      while True:
+        restart = input("Do you want to deposit more -type y for yes /n for no?")
+        if restart.lower() == "n":
+          quit()
+        
+        elif restart.lower() == "y":
+          VideoPoker()
+    
+    print()
     print("Do you want to cash out or continue ?")
-    withdraw = input("press y to cash out or press any key to continue?: ")
+    withdraw = input("-press y to cash out or -press ENTER to continue:")
     if withdraw.lower() == "y":
-      print("{0},your withdraw amount: {1}".format(nameInput,bet))
+      print("{0},you cashed out:{1}".format(nameInput,bet))
       print("ThankYou for playing.See you next time! ")
       time.sleep(1)
       quit()
+
+   
+
     player.cards=[]
-    if bet <= 0:
-      print("You loose all your bet. Game Over.")
-      restart = input("do you want to restart y/n?")
-      if restart.lower() == "n":
-        quit()
-        
-      elif restart.lower() == "y":
-        VideoPoker()
+
+    
       
 
 
 VideoPoker()
-    
-
-
-
-  
-  
-
-
-    
